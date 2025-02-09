@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: userRepo
+    runtime: docker
+    repo: https://github.com/diwakarbabu080/userRepo
+    branch: main
+    rootDir: .
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 10000
