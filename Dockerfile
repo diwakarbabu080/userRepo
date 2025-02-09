@@ -1,25 +1,16 @@
-# Use official Java 17 runtime image
-FROM openjdk:17-jdk-slim
-
-# Set working directory inside the container
+# 1️⃣ Use Maven to build the JAR
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copy Maven wrapper files and source code
-COPY .mvn .mvn
-COPY mvnw pom.xml ./
-COPY src src
+# 2️⃣ Use a lightweight JDK to run the app
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
 
-# Grant execute permissions to the Maven wrapper
-RUN chmod +x ./mvnw
-
-# Build the JAR file
-RUN ./mvnw clean package -DskipTests
-
-# Copy the generated JAR file to run
-COPY target/*.jar app.jar
-
-# Expose the application port
+# Expose the application port (Render uses PORT env variable)
 EXPOSE 8080
 
-# Command to run the application
+# Run the JAR file
 CMD ["java", "-jar", "app.jar"]
