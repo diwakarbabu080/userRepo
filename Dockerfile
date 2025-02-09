@@ -1,15 +1,25 @@
-# Use an official OpenJDK runtime as a parent image
+# Use official Java 17 runtime image
 FROM openjdk:17-jdk-slim
 
-# Set the working directory in the container
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy the built JAR file into the container
+# Copy Maven wrapper files and source code
+COPY .mvn .mvn
+COPY mvnw pom.xml ./
+COPY src src
+
+# Grant execute permissions to the Maven wrapper
+RUN chmod +x ./mvnw
+
+# Build the JAR file
+RUN ./mvnw clean package -DskipTests
+
+# Copy the generated JAR file to run
 COPY target/*.jar app.jar
 
-# Expose the application port (Render uses PORT env variable)
-EXPOSE 10000
+# Expose the application port
+EXPOSE 8080
 
 # Command to run the application
-CMD ["sh", "-c", "java -jar app.jar --server.port=$PORT"]
-
+CMD ["java", "-jar", "app.jar"]
